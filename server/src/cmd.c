@@ -9,6 +9,7 @@ void send_pwd(int sfd){
     data_t buf;
     bzero(&buf, sizeof(buf));
     getcwd(buf.data, sizeof(buf.data));
+    buf.len = strlen(buf.data);
     send_complete(sfd, &buf);
 }
 

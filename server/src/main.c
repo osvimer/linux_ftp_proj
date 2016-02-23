@@ -11,7 +11,7 @@ int main (int argc, char const* argv[]){
         return -1;
     }
     //设置服务端为守护进程
-    //set_daemon();
+    set_daemon();
     //读取配置文件
     int conf_fd = open(argv[1], O_RDONLY);
     if(-1 == conf_fd){
@@ -25,7 +25,6 @@ int main (int argc, char const* argv[]){
         perror("read config");
         return -1;
     }
-    close(conf_fd);
     //获取配置参数
     struct server_config s_conf;
     bzero(&s_conf, sizeof(s_conf));
@@ -58,6 +57,8 @@ int main (int argc, char const* argv[]){
     pchild_t cptr;
     cptr = (pchild_t)calloc(peer_max, sizeof(child_t));
     make_child(cptr, peer_max);
+    //关闭配置文件
+    close(conf_fd);
     //建立SOCKET连接
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
     if(-1 == sfd){
@@ -139,5 +140,8 @@ int main (int argc, char const* argv[]){
             }
         }
     }
+    close(epfd);
+    close(sfd);
+    close(log_fd);
     return 0;
 }
