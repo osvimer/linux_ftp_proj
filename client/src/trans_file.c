@@ -13,11 +13,10 @@ void recv_status(int sfd, int * status){
 void send_complete(int sfd, pdata_t buf){
     int size = 0;
     int total = 0;
-    buf->len = strlen(buf->data);
     int len = buf->len + sizeof(int);
     buf->len = htonl(buf->len);
     while(total < len){
-        size = send(sfd, buf + size, len - total, 0);
+        size = send(sfd, buf + total, len - total, 0);
         total += size;
     }
 }
@@ -30,7 +29,7 @@ void recv_complete(int sfd, pdata_t buf){
     buf->len = ntohl(buf->len);
     int len = buf->len;
     while(total < len){
-        size = recv(sfd, buf->data + total, buf->len - total, 0);
+        size = recv(sfd, buf->data + total, len - total, 0);
         total += size;
     }
 }
@@ -38,38 +37,35 @@ void recv_complete(int sfd, pdata_t buf){
 void send_file_len(int sfd, char * file_name){
     struct stat file_stat;
     stat(file_name, &file_stat);
-    data_t buf;
     //发送文件大小
     long file_len = file_stat.st_size;
-    bzero(&buf, sizeof(buf));
-    memcpy(&buf.data, &file_len, sizeof(long));
-    send_complete(sfd, &buf);
+    send(sfd, &file_len, sizeof(long), 0);
+    printf("send flie len = %ld\n", file_len);
 }
 
 void recv_file_len(int sfd, long * file_len){
     //获取文件大小
-    data_t buf;
-    recv_complete(sfd, &buf);
-    memcpy(file_len, buf.data, sizeof(long));
+    recv(sfd, file_len, sizeof(long), 0);
+    printf("recv flie len = %ld\n", * file_len);
 }
 
 void send_file_by_fd(int sfd, int fd){
     data_t buf;
     //发送文件给客户端
-    while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data))) > 0){
+    while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data) - 1)) > 0){
         send_complete(sfd, &buf);
     }
 }
 
 void recv_file_by_fd(int sfd, int fd, long file_len){
     data_t buf;
-    long file_size = 0;
+    long send_size = 0;
     //从客户端接收文件
-    while(file_size < file_len){
+    while(send_size < file_len){
         bzero(&buf, sizeof(buf));
         recv_complete(sfd, &buf);
         write(fd, buf.data, buf.len);
-        file_size += buf.len;
+        send_size += buf.len;
     }
 }
 
@@ -86,19 +82,20 @@ void send_file_by_name(int sfd, char * file_name){
     send_status(sfd, 0);
     //发送文件大小
     file_len = file_stat.st_size;
-    bzero(&buf, sizeof(buf));
-    memcpy(&buf.data, &file_len, sizeof(long));
-    send_complete(sfd, &buf);
+    send(sfd, &file_len, sizeof(long), 0);
+    printf("send flie len = %ld\n", file_len);
     //发送文件内容
-    while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data))) > 0){
+    while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data) - 1)) > 0){
         send_complete(sfd, &buf);
     }
     close(fd);
+    printf("send file %s over!\n", file_name);
 }
 
 void recv_file_by_name(int sfd, char * file_name){
     int fd;
-    long int file_len, file_size;
+    long int file_len;
+    long int send_size = 0;
     data_t buf;
     fd = open(file_name, O_WRONLY|O_CREAT, 0644);
     if(-1 == fd){
@@ -107,18 +104,17 @@ void recv_file_by_name(int sfd, char * file_name){
     }
     send_status(sfd, 0);
     //获取文件大小
-    bzero(&buf, sizeof(buf));
-    recv_complete(sfd, &buf);
-    memcpy(&file_len, buf.data, sizeof(long));
-    file_size = 0;
+    recv(sfd, &file_len, sizeof(long), 0);
+    printf("recv flie len = %ld\n", file_len);
     //接收文件内容
-    while(file_size < file_len){
+    while(send_size < file_len){
         bzero(&buf, sizeof(buf));
         recv_complete(sfd, &buf);
         write(fd, buf.data, buf.len);
-        file_size += buf.len;
+        send_size += buf.len;
     }
     close(fd);
+    printf("recv file %s over!\n", file_name);
 }
 
 void recv_print(int sfd, long file_len){

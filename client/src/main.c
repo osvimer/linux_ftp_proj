@@ -56,6 +56,7 @@ int main (int argc, char const * argv[]){
                 args[1][0] = '.';
             }
             strcat(buf.data, args[1]);
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_status(sfd, &status);
             if(-1 == status){
@@ -70,6 +71,7 @@ int main (int argc, char const * argv[]){
                 args[1][0] = '.';
             }
             strcat(buf.data, args[1]);
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_status(sfd, &status);
             if(-1 == status){
@@ -81,6 +83,7 @@ int main (int argc, char const * argv[]){
             strcpy(pwd, buf.data);
         }else if(0 == strcmp(args[0], "pwd")){
             strcpy(buf.data, "PWD");
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_complete(sfd, &buf);
             strcpy(pwd, buf.data);
@@ -88,6 +91,7 @@ int main (int argc, char const * argv[]){
         }else if(0 == strcmp(args[0], "rm")){
             strcpy(buf.data, "RMD ");
             strcat(buf.data, args[1]);
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_status(sfd, &status);
             if(-1 == status){
@@ -98,6 +102,7 @@ int main (int argc, char const * argv[]){
         }else if(0 == strcmp(args[0], "gets")){
             strcpy(buf.data, "RETR ");
             strcat(buf.data, args[1]);
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_status(sfd, &status);
             if(-1 == status){
@@ -120,20 +125,24 @@ int main (int argc, char const * argv[]){
             }
             strcpy(buf.data, "STOR ");
             strcat(buf.data, args[1]);
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             recv_status(sfd, &status);
             if(-1 == status){
                 printf("puts failed!\n");
                 continue;
             }
+            close(trans_fd);
             //发送文件大小
             send_file_len(sfd, args[1]);
             //发送文件内容
+            trans_fd = open(args[1], O_RDONLY);
             send_file_by_fd(sfd, trans_fd);
-            printf("upload success!\n");
             close(trans_fd);
+            printf("upload success!\n");
         }else if(0 == strcmp(args[0], "exit")){
             strcpy(buf.data, "ABORT");
+            buf.len = strlen(buf.data);
             send_complete(sfd, &buf);
             exit(0);
         }else{

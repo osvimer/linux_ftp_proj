@@ -17,6 +17,7 @@ void get_identify(int sfd, char * username){
         scanf("%s", name);
         bzero(&buf, sizeof(buf));
         strcpy(buf.data, name);
+        buf.len = strlen(buf.data);
         send_complete(sfd, &buf);
         recv_status(sfd, &remote_status);
         if(-1 == remote_status){
@@ -27,6 +28,7 @@ void get_identify(int sfd, char * username){
         passwd = getpass("password: ");
         bzero(&buf, sizeof(buf));
         strcpy(buf.data, passwd);
+        buf.len = strlen(buf.data);
         send_complete(sfd, &buf);
         recv_status(sfd, &remote_status);
         if(-1 == remote_status){
