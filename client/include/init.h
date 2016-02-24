@@ -4,5 +4,6 @@
 #include <signal.h>
 
 void signal_handle(int);
+void log_time(char *);
 
 #endif

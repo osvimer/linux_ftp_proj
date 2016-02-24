@@ -1,5 +1,5 @@
-#ifndef __SERVICE__
-#define __SERVICE__
+#ifndef __INIT__
+#define __INIT__
 #include "head.h"
 
 #define FILE_NEME_LEN 128
@@ -16,5 +16,6 @@ struct server_config{
 };
 
 void set_daemon();
+void log_time();
 void signal_handle(int);
 #endif

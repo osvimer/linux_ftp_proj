@@ -1,4 +1,5 @@
 #include "trans_file.h"
+#include "init.h"
 
 void send_status(int sfd, int status){
     int msg = htonl(status);
@@ -40,13 +41,11 @@ void send_file_len(int sfd, char * file_name){
     //发送文件大小
     long file_len = file_stat.st_size;
     send(sfd, &file_len, sizeof(long), 0);
-    printf("send flie len = %ld\n", file_len);
 }
 
 void recv_file_len(int sfd, long * file_len){
     //获取文件大小
     recv(sfd, file_len, sizeof(long), 0);
-    printf("recv flie len = %ld\n", * file_len);
 }
 
 void send_file_by_fd(int sfd, int fd){
@@ -83,13 +82,12 @@ void send_file_by_name(int sfd, char * file_name){
     //发送文件大小
     file_len = file_stat.st_size;
     send(sfd, &file_len, sizeof(long), 0);
-    printf("send flie len = %ld\n", file_len);
     //发送文件内容
     while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data) - 1)) > 0){
         send_complete(sfd, &buf);
     }
     close(fd);
-    printf("send file %s over!\n", file_name);
+    printf("send flie %s, %ld Bytes\n", file_name, file_len);
 }
 
 void recv_file_by_name(int sfd, char * file_name){
@@ -105,7 +103,6 @@ void recv_file_by_name(int sfd, char * file_name){
     send_status(sfd, 0);
     //获取文件大小
     recv(sfd, &file_len, sizeof(long), 0);
-    printf("recv flie len = %ld\n", file_len);
     //接收文件内容
     while(send_size < file_len){
         bzero(&buf, sizeof(buf));
@@ -114,11 +111,7 @@ void recv_file_by_name(int sfd, char * file_name){
         send_size += buf.len;
     }
     close(fd);
-    printf("recv file %s over!\n", file_name);
-}
-
-void recv_print(int sfd, long file_len){
-    ;
+    printf("recv flie %s, %ld Bytes\n", file_name, file_len);
 }
 
 void multi_thread_send_file(){

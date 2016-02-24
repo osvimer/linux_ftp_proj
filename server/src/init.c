@@ -1,5 +1,7 @@
 #include "init.h"
 
+extern int server_status;
+
 void set_daemon(){
     const int MAXFD = 64;
     if(fork() != 0){//父进程退出
@@ -14,6 +16,14 @@ void set_daemon(){
     }
 }
 
+void log_time(){
+    time_t rtime;
+    struct tm * ptm;
+    time(&rtime);
+    ptm = gmtime(&rtime);
+    printf("%d年%d月%d日 %02d:%02d:%02d  ", ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour + 8, ptm->tm_min, ptm->tm_sec);
+}
+
 void signal_handle(int signum){
-    exit(0);
+    server_status = 0;
 }

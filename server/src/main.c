@@ -18,7 +18,7 @@ int main (int argc, char const* argv[]){
         perror("open config");
         return -1;
     }
-    char buf[512];
+    char buf[1024];
     bzero(buf, sizeof(buf));
     int ret = read(conf_fd, buf, sizeof(buf));
     if(-1 == ret){
@@ -30,7 +30,6 @@ int main (int argc, char const* argv[]){
     bzero(&s_conf, sizeof(s_conf));
     sscanf(buf, "%*[^=]=%s%*[^=]=%d%*[^=]=%d%*[^=]=%d%*[^=]=%s%*[^=]=%s", s_conf.ip, &s_conf.port, &s_conf.peer_max, &s_conf.log_enable, s_conf.log_file, s_conf.root_dir);
     if(!(* s_conf.ip) || !s_conf.port){
-        printf("config error!");
         return -1;
     }
     //最大连接数
@@ -45,13 +44,23 @@ int main (int argc, char const* argv[]){
         return -1;
     }
     //打开日志记录文件,开始记录日志
-    int log_fd;
+    int log_fd, err_fd;
     if(s_conf.log_enable){
-        log_fd = open(s_conf.log_file, O_WRONLY|O_CREAT, 0666);
+        log_fd = open(s_conf.log_file, O_RDWR|O_CREAT, 0666);
         if(-1 == log_fd){
             perror("open log file");
             return -1;
         }
+        err_fd = dup(log_fd);
+        lseek(log_fd, 0, SEEK_END);
+        /*
+        bzero(buf, sizeof(buf));
+        sprintf(buf, "conf_fd = %d, log_fd = %d\n", conf_fd, log_fd);
+        write(log_fd, buf, strlen(buf));
+        */
+        log_time();
+        printf("ftp server start!\n");
+        fflush(stdout);
     }
     //创建进程池
     pchild_t cptr;
@@ -59,6 +68,8 @@ int main (int argc, char const* argv[]){
     make_child(cptr, peer_max);
     //关闭配置文件
     close(conf_fd);
+    //注册信号捕捉函数
+    signal(SIGINT, signal_handle);
     //建立SOCKET连接
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
     if(-1 == sfd){
@@ -105,7 +116,7 @@ int main (int argc, char const* argv[]){
             return -1;
         }
     }
-    int pmsg = 1;
+    int status = 1;
     int newfd = -1;
     //开始任务处理(监听SOCKET连接，分配任务给子进程，记录子进程状态)
     while(server_status){
@@ -119,7 +130,6 @@ int main (int argc, char const* argv[]){
                         perror("accept");
                         return -1;
                     }
-                    printf("accept a new client!\n");
                     for(j = 0; j < peer_max; j++){
                         if(0 == cptr[j].busy){
                             break;
@@ -133,15 +143,24 @@ int main (int argc, char const* argv[]){
                 }
                 for(j = 0; j < peer_max; j++){
                     if(epevs[i].data.fd == cptr[j].pfd && epevs[i].events == EPOLLIN){
-                        read(cptr[j].pfd, &pmsg, sizeof(int));
+                        read(cptr[j].pfd, &status, sizeof(int));
                         cptr[j].busy = 0;
                     }
                 }
             }
         }
     }
+    //给子进程发送结束信号
+    for(i = 0; i < peer_max; i++){
+        kill(cptr[i].pid, SIGKILL);
+        close(cptr[i].pfd);
+    }
+    log_time();
+    printf("ftp server stop!\n");
+    fflush(stdout);
     close(epfd);
     close(sfd);
     close(log_fd);
+    close(err_fd);
     return 0;
 }

@@ -3,7 +3,7 @@
 #include "cmd.h"
 #include "trans_file.h"
 
-#define TMP_FILE "/tmp/_ftp_ls.tmp"
+#define TMP_FILE "/tmp/ftp_ls.tmp"
 
 void send_pwd(int sfd){
     data_t buf;
@@ -37,6 +37,5 @@ int send_list(int sfd, char * file_name){
     //发送临时文件
     send_file_by_fd(sfd, fd);
     close(fd);
-    printf("send tmp file over!\n");
     return 0;
 }

@@ -11,6 +11,8 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <pwd.h>
+#include <time.h>
+#include <signal.h>
 #include <sys/utsname.h>
 #include <sys/types.h>
 #include <sys/select.h>

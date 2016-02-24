@@ -1,5 +1,6 @@
 #include "identify.h"
 #include "trans_file.h"
+#include "init.h"
 
 void get_salt(char * salt, char * passwd){
     int i, j;
@@ -31,10 +32,8 @@ void client_identify(int sfd){
         bzero(&buf, sizeof(buf));
         recv_complete(sfd, &buf);
         strcpy(username, buf.data);
-        printf("recv username %s\n", username);
         if((sp = getspnam(username)) == NULL){//用户名检查
             send_status(sfd, -1);
-            printf("username error!\n");
             continue;
         }else{
             //接收密码
@@ -53,11 +52,11 @@ void client_identify(int sfd){
                 pw = getpwnam(username);
                 setegid(pw->pw_gid);
                 seteuid(pw->pw_uid);
-                printf("confirm success!\n");
                 //printf("after idendity, uid = %d, euid = %d, gid = %d, egid = %d\n", getuid(), geteuid(), getgid(), getegid());
+                log_time();
+                printf("%s login success\n", username);
             }else{//验证失败
                 send_status(sfd, -1);
-                printf("confirm faild!\n");
                 continue;
             }
         }
