@@ -3,6 +3,8 @@
 #include "head.h"
 //#include "thread_poll.h"
 
+#define FILE_MMAP_SIZE 104857600
+
 void send_status(int, int);
 void recv_status(int, int *);
 void send_complete(int, pdata_t);

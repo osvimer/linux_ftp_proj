@@ -1,5 +1,6 @@
 #include "trans_file.h"
 #include "init.h"
+#include <sys/mman.h>
 
 void send_status(int sfd, int status){
     int msg = htonl(status);
@@ -72,46 +73,79 @@ void send_file_by_name(int sfd, char * file_name){
     struct stat file_stat;
     int status = stat(file_name, &file_stat);
     int fd = open(file_name, O_RDONLY);
-    long file_len;
+    long file_len, offset;
     data_t buf;
     if(-1 == status || -1 == fd){
         send_status(sfd, -1);
         return;
     }
     send_status(sfd, 0);
+    //接收文件续传位置
+    recv(sfd, &offset, sizeof(long), 0);
+    //重定位到续传位置
+    lseek(fd, offset, SEEK_SET);
     //发送文件大小
     file_len = file_stat.st_size;
     send(sfd, &file_len, sizeof(long), 0);
     //发送文件内容
-    while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data) - 1)) > 0){
-        send_complete(sfd, &buf);
+    if(file_len > FILE_MMAP_SIZE){//大文件采用内存映射
+        int i;
+        long j = 0;
+        long send_len = file_len - offset;
+        //char * mpt = (char *)mmap(0, send_len, PROT_READ, MAP_SHARED, fd, offset);
+        char * mpt = (char *)mmap(0, send_len, PROT_READ, MAP_SHARED, fd, 0);
+        while(j < send_len){
+            bzero(&buf, sizeof(buf));
+            for(i = 0; i < sizeof(buf.data) && j < send_len; i++, j++){
+                buf.data[i] = mpt[j];
+            }
+            buf.len = i;
+            send_complete(sfd, &buf);
+        }
+        munmap(mpt, send_len);
+    }else{//小文件直接发送
+        while(bzero(&buf, sizeof(buf)), (buf.len = read(fd, buf.data, sizeof(buf.data) - 1)) > 0){
+            send_complete(sfd, &buf);
+        }
     }
     close(fd);
     printf("send flie %s, %ld Bytes\n", file_name, file_len);
+    fflush(stdout);
 }
 
 void recv_file_by_name(int sfd, char * file_name){
-    int fd;
-    long int file_len;
-    long int send_size = 0;
-    data_t buf;
-    fd = open(file_name, O_WRONLY|O_CREAT, 0644);
+    long int file_len, offset;
+    long int recv_size = 0;
+    struct stat file_stat;
+    int status = stat(file_name, &file_stat);
+    if(-1 == status){
+        offset = 0;
+    }else{
+        offset = file_stat.st_size;
+    }
+    int fd = open(file_name, O_WRONLY|O_CREAT, 0644);
     if(-1 == fd){
         send_status(sfd, -1);
         return;
     }
     send_status(sfd, 0);
+    //发送文件续传位置
+    send(sfd, &offset, sizeof(long), 0);
+    //重定位到文件末尾
+    lseek(fd, 0, SEEK_END);
     //获取文件大小
     recv(sfd, &file_len, sizeof(long), 0);
     //接收文件内容
-    while(send_size < file_len){
+    data_t buf;
+    while(recv_size < file_len - offset){
         bzero(&buf, sizeof(buf));
         recv_complete(sfd, &buf);
         write(fd, buf.data, buf.len);
-        send_size += buf.len;
+        recv_size += buf.len;
     }
     close(fd);
     printf("recv flie %s, %ld Bytes\n", file_name, file_len);
+    fflush(stdout);
 }
 
 void multi_thread_send_file(){

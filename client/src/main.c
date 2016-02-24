@@ -35,7 +35,8 @@ int main (int argc, char const * argv[]){
     char pwd[128] = {0};
     char logtime[24] = {0};
     int status, trans_fd;
-    long int file_len;
+    long int file_len, offset;
+    struct stat file_stat;
     //身份认证
     get_identify(sfd, username);
     //记录登录信息到日志
@@ -119,22 +120,33 @@ int main (int argc, char const * argv[]){
                 strcat(buf.data, args[1]);
                 buf.len = strlen(buf.data);
                 send_complete(sfd, &buf);
+                //发送文件偏移大小
+                status = stat(args[1], &file_stat);
+                if(-1 == status){
+                    offset = 0;
+                }else{
+                    offset = file_stat.st_size;
+                }
+                send(sfd, &offset, sizeof(long), 0);
+                //接收服务端响应状态
                 recv_status(sfd, &status);
                 if(-1 == status){
                     printf("gets failed!\n");
                     continue;
                 }
                 //获取文件大小
-                recv_file_len(sfd, &file_len);
-                //获取文件内容
+                recv(sfd, &file_len, sizeof(int), 0);
                 trans_fd = open(args[1], O_WRONLY|O_CREAT, 0644);
-                recv_file_by_fd(sfd, trans_fd, file_len);
+                //重定位到文件末尾
+                lseek(trans_fd, 0, SEEK_END);
+                //获取文件内容
+                recv_file_by_fd(sfd, trans_fd, file_len - offset);
                 close(trans_fd);
                 printf("download success!\n");
             }else if(0 == strcmp(args[0], "puts")){
                 //判断文件状态
-                trans_fd = open(args[1], O_RDONLY);
-                if(-1 == trans_fd){
+                status = stat(args[1], &file_stat);
+                if(-1 == status){
                     printf("file not exist!\n");
                     continue;
                 }
@@ -142,17 +154,39 @@ int main (int argc, char const * argv[]){
                 strcat(buf.data, args[1]);
                 buf.len = strlen(buf.data);
                 send_complete(sfd, &buf);
-                recv_status(sfd, &status);
-                if(-1 == status){
+                //接受文件偏移大小
+                recv(sfd, &offset, sizeof(long), 0);
+                file_len = file_stat.st_size;
+                if(offset >= file_len){
+                    send_status(sfd, -1);
                     printf("puts failed!\n");
                     continue;
                 }
-                close(trans_fd);
+                send_status(sfd, 0);
                 //发送文件大小
-                send_file_len(sfd, args[1]);
-                //发送文件内容
+                send(sfd, &file_len, sizeof(long), 0);
                 trans_fd = open(args[1], O_RDONLY);
-                send_file_by_fd(sfd, trans_fd);
+                //重定位到续传位置
+                lseek(trans_fd, offset, SEEK_SET);
+                //发送文件内容
+                if(file_len > FILE_MMAP_SIZE){//大文件采取内存映射
+                    int i;
+                    long j = 0;
+                    long send_len = file_len - offset;
+                    //char * mpt = (char *)mmap(0, send_len, PROT_READ, MAP_SHARED, trans_fd, offset);
+                    char * mpt = (char *)mmap(0, send_len, PROT_READ, MAP_SHARED, trans_fd, 0);
+                    while(j < send_len){
+                        bzero(&buf, sizeof(buf));
+                        for(i = 0; i < sizeof(buf.data) && j < send_len; i++, j++){
+                            buf.data[i] = mpt[j];
+                        }
+                        buf.len = i;
+                        send_complete(sfd, &buf);
+                    }
+                    munmap(mpt, send_len);
+                }else{//小文件直接发送
+                    send_file_by_fd(sfd, trans_fd);
+                }
                 close(trans_fd);
                 printf("upload success!\n");
             }else if(0 == strcmp(args[0], "exit")){
