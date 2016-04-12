@@ -39,6 +39,10 @@
     Version 0.2.0 - 25 Feb 2016:
         - Add resuming and mmap
 
-    Version 0.1.0 - 18 Feb 2016:
+    Version 0.1.1 - 22 Feb 2016:
         - Implemented list command
         - Minor changes
+
+    Version 0.0.1 - 20 Feb 2016:
+        - Project initialization
+        - complete basis funcions
