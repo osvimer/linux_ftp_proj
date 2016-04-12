@@ -1,7 +1,7 @@
 * Author         : Junjie Huang
 * Email          : acmhjj@gmail.com
 * Description    : FTP Server / Client
-* version        : 0.02
+* version        : 0.03
 - 初步功能：密码验证, 守护进程，日志记录(完成)
 - 二期功能：断点续传，内存映射(大文件下载/上传)(完成)
 - 三期功能：多线程下载，实现数据、命令双通道
@@ -11,7 +11,7 @@
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
 
-2. cd linux_ftp_pro
+2. cd linux_ftp_proj
 
 3. make
 
