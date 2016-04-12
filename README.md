@@ -7,7 +7,7 @@
 - 三期功能：多线程下载，实现数据、命令双通道
 - TODO：遵循FTP协议(RFC 959)，并实现其他功能
 
-** 使用说明：
+## 使用说明：
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
 
