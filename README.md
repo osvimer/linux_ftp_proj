@@ -10,9 +10,12 @@
 #### 使用说明：
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
+
 2. cd linux_ftp_proj
+
 3. make
-4. 修改服务端配配置（IP、端口、服务端根目录）
+
+4. 修改服务端配置文件（IP、端口、服务端根目录）
     > $ vim server/conf/server.conf
 
 5. 启动服务端
@@ -21,5 +24,6 @@
 6. 启动客户端 
     > $ clean/bin/client $SERVER_IP $SERVER_PORT
 
-7. 以服务端所在系统中实际存在的用户名及密码登录
+7. 以服务端所在系统中实际存在的用户名密码登录
+
 8. 输入 help 命令查看帮助
