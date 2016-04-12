@@ -1,15 +1,15 @@
-### About：
+### ABOUT：
 
 * Author         : Junjie Huang
 * Email          : acmhjj@gmail.com
 * Description    : FTP Server / Client
 * version        : 0.03
-- 初步功能：密码验证, 守护进程，日志记录（完成）
-- 二期功能：断点续传，内存映射（大文件下载/上传）（完成）
-- 三期功能：多线程下载，实现数据、命令双通道
-- TODO：遵循 FTP 协议（RFC 959），并实现其他功能
+- Phase I：user identify, set daemon，log records. (completed)
+- Phase II：resuming，mmap (large files download/upload). (completed)
+- Phase III：multi-thread download / upload，dual-channel transport (data and command).
+- TODO：support the FTP Protocol in the RFC 959, add some other functions.
 
-### HOW TO：
+### HOWTO：
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
 
@@ -17,28 +17,28 @@
 
 3. make
 
-4. 修改服务端配置文件（IP、端口、根目录、最大连接数）
+4. Edit the server configuration(IP, Port, Root Directory, Max peers and so on)
     > $ vim server/conf/server.conf
 
-5. 启动服务端
+5. Start the FTP Server
     > $ sudo server/bin/server server/conf/server.conf
 
-6. 启动客户端 
+6. Start the FTP Client
     > $ client/bin/client SERVER_IP SERVER_PORT
 
-7. 以服务端所在系统中实际存在的用户名密码登录
+7. Login. Use the real username and password of the system in which the FTP server runs.
 
-8. 输入 help 命令查看帮助
+8. Type 'help' to learn how to use the client system.
 
 ### CHANGELOG:：
 
-* Version 0.3.0 - 12 Apr 2016:
+Version 0.3.0 - 12 Apr 2016:
 - Add some useful interaction.
 - Minor changes
 
-* Version 0.2.0 - 25 Feb 2016:
+Version 0.2.0 - 25 Feb 2016:
 - Add resuming and mmap
 
-* Version 0.1.0 - 18 Feb 2016:
+Version 0.1.0 - 18 Feb 2016:
 - Implemented list command
 - Minor changes
