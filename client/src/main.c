@@ -65,7 +65,21 @@ int main (int argc, char const * argv[]){
             sprintf(buf.data, "%s  %s %s %s\n", logtime, args[0], args[1], args[2]);
             write(log_fd, buf.data, strlen(buf.data));
             bzero(&buf, sizeof(buf));
-            //处理命令: 1.发送命令及参数 2.接收服务端响应码 3.接受/发送数据(可选)
+            //命令处理：按命令是否涉及文件及目录操作，分为界面交互命令（clear, exit）和文件操作命令; 文件操作命令按是否以"!"开头区分为本地命令和远程命令
+            //本地命令：为满足本地文件及目录操作需要，同时避免复杂化，限制用户使用以下本地命令: ls/cd/pwd/rm/mkdir/mv/du。除"cd"调用chdir外，其他直接调用同名系统命令。
+            if('!' == args[0][0]){
+                if(0 == strcmp(args[0], "!cd")){
+                    chdir(args[1]);
+                }else if((0 == strcmp(args[0], "!ls")) || (0 == strcmp(args[0], "!pwd")) || (0 == strcmp(args[0], "!rm")) || (0 == strcmp(args[0], "!mkdir")) || (0 == strcmp(args[0], "!mv")) || (0 == strcmp(args[0], "!du"))){
+                    char * ptr = args[0];
+                    sprintf(buf.data, "%s %s %s", ptr + 1, args[1], args[2]);
+                    system(buf.data);
+                }else{
+                    printf("grammar error!\n");
+                }
+                continue;
+            }
+            //远程命令: 1.发送命令及参数 2.接收服务端响应码 3.接受/发送数据(可选)
             if(0 == strcmp(args[0], "ls")){
                 strcpy(buf.data, "LIST ");
                 if(0 == strlen(args[1])){
@@ -189,12 +203,22 @@ int main (int argc, char const * argv[]){
                 }
                 close(trans_fd);
                 printf("upload success!\n");
+            }
+            //界面交互命令
+            else if(0 == strcmp(args[0], "help")){
+                printf("help\t\t\t--获取帮助\nclear\t\t\t--清理终端\nexit\t\t\t--退出客户端\n\n!ls LOCAL_DIR/FILE\t--列出本地目录/文件\n!cd LOCAL_DIR\t\t--切换本地目录\n!pwd\t\t\t--打印本地当前路径\n!rm LOCAL_FILE\t\t--删除本地文件\n!mkdir LOCAL_DIR\t--创建本地目录\n!mv SRC_PATH DST_PATH\t--移动本地目录/文件\n!du LOCAL_FILE\t\t--查看本地目录/文件大小\n\nls REMOTE_DIR/FILE\t--列出远程目录/文件\npwd\t\t\t--打印服务端当前路径\ncd REMOTE_DIR\t\t--切换服务端目录\nrm REMOTE_FILE\t\t--删除服务端文件\ngets REMOTE_FILE\t--下载服务端文件到本地\nputs LOCAL_FILE\t\t--上传本地文件到服务端\n");
+                continue;
+            }else if(0 == strcmp(args[0], "clear")){
+                system(args[0]);
+                continue;
             }else if(0 == strcmp(args[0], "exit")){
                 strcpy(buf.data, "ABORT");
                 buf.len = strlen(buf.data);
                 send_complete(sfd, &buf);
                 connect_status = 0;
-            }else{
+            }
+            //无效命令
+            else{
                 printf("grammar error!\n");
                 continue;
             }
