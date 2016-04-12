@@ -17,7 +17,7 @@
 
 3. make
 
-4. Edit the server configuration(IP, Port, Root Directory, Max peers and so on)
+4. Edit the server configuration files to configure the FTP server (IP, Port, Root Directory, Max peers and so on).
     > $ vim server/conf/server.conf
 
 5. Start the FTP Server
@@ -32,13 +32,13 @@
 
 ### CHANGELOG:：
 
-Version 0.3.0 - 12 Apr 2016:
-- Add some useful interaction.
-- Minor changes
+    Version 0.3.0 - 12 Apr 2016:
+        - Add some useful interaction.
+        - Minor changes
 
-Version 0.2.0 - 25 Feb 2016:
-- Add resuming and mmap
+    Version 0.2.0 - 25 Feb 2016:
+        - Add resuming and mmap
 
-Version 0.1.0 - 18 Feb 2016:
-- Implemented list command
-- Minor changes
+    Version 0.1.0 - 18 Feb 2016:
+        - Implemented list command
+        - Minor changes
