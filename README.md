@@ -15,14 +15,14 @@
 
 3. make
 
-4. 修改服务端配置文件（IP、端口、服务端根目录）
+4. 修改服务端配置文件（IP、端口、根目录、最大连接数）
     > $ vim server/conf/server.conf
 
 5. 启动服务端
     > $ sudo server/bin/server server/conf/server.conf
 
 6. 启动客户端 
-    > $ clean/bin/client $SERVER_IP $SERVER_PORT
+    > $ client/bin/client $SERVER_IP $SERVER_PORT
 
 7. 以服务端所在系统中实际存在的用户名密码登录
 
