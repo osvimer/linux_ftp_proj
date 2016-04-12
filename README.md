@@ -1,4 +1,4 @@
-### 关于项目：
+### About：
 
 * Author         : Junjie Huang
 * Email          : acmhjj@gmail.com
@@ -9,7 +9,7 @@
 - 三期功能：多线程下载，实现数据、命令双通道
 - TODO：遵循 FTP 协议（RFC 959），并实现其他功能
 
-### 使用说明：
+### HOW TO：
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
 
@@ -30,15 +30,15 @@
 
 8. 输入 help 命令查看帮助
 
-### 日志：
+### CHANGELOG:：
 
-Version 0.3.0 - 12 Apr 2016:
+* Version 0.3.0 - 12 Apr 2016:
 - Add some useful interaction.
 - Minor changes
 
-Version 0.2.0 - 25 Feb 2016:
+* Version 0.2.0 - 25 Feb 2016:
 - Add resuming and mmap
 
-Version 0.1.0 - 18 Feb 2016:
+* Version 0.1.0 - 18 Feb 2016:
 - Implemented list command
 - Minor changes
