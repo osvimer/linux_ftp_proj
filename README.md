@@ -3,7 +3,7 @@
     * Author         : Junjie Huang
     * Email          : acmhjj@gmail.com
     * Description    : FTP Server / Client
-    * version        : 0.03
+    * version        : 0.30
     - Phase I：user identify, set daemon，log records. (completed)
     - Phase II：resuming，mmap (large files download/upload). (completed)
     - Phase III：multi-thread download / upload，dual-channel transport (data and command).
