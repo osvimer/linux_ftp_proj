@@ -1,13 +1,15 @@
+### 关于项目：
+
 * Author         : Junjie Huang
 * Email          : acmhjj@gmail.com
 * Description    : FTP Server / Client
 * version        : 0.03
-- 初步功能：密码验证, 守护进程，日志记录(完成)
-- 二期功能：断点续传，内存映射(大文件下载/上传)(完成)
+- 初步功能：密码验证, 守护进程，日志记录（完成）
+- 二期功能：断点续传，内存映射（大文件下载/上传）（完成）
 - 三期功能：多线程下载，实现数据、命令双通道
-- TODO：遵循FTP协议(RFC 959)，并实现其他功能
+- TODO：遵循 FTP 协议（RFC 959），并实现其他功能
 
-#### 使用说明：
+### 使用说明：
 
 1. git clone https://github.com/osvimer/linux_ftp_proj.git
 
@@ -22,8 +24,24 @@
     > $ sudo server/bin/server server/conf/server.conf
 
 6. 启动客户端 
-    > $ client/bin/client $SERVER_IP $SERVER_PORT
+    > $ client/bin/client SERVER_IP SERVER_PORT
 
 7. 以服务端所在系统中实际存在的用户名密码登录
 
 8. 输入 help 命令查看帮助
+
+### 日志：
+
+Version 0.3.0 - 12 Apr 2016:
+- Add some useful interaction.
+- Minor changes
+-
+
+Version 0.2.0 - 25 Feb 2016:
+- Add resuming and mmap
+-
+
+Version 0.1.0 - 18 Feb 2016:
+- Implemented list command
+- Minor changes
+-
