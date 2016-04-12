@@ -17,14 +17,14 @@
 
     3. make
 
-    4. Edit the server configuration files to configure the FTP server (IP, Port, Root Directory, Max peers and so on).
-        > $ vim server/conf/server.conf
+    4. Edit the server configuration files (IP, Port, Root Directory, Max peers and so on).
+        $ vim server/conf/server.conf
 
     5. Start the FTP Server
-        > $ sudo server/bin/server server/conf/server.conf
+        $ sudo server/bin/server server/conf/server.conf
 
     6. Start the FTP Client
-        > $ client/bin/client SERVER_IP SERVER_PORT
+        $ client/bin/client SERVER_IP SERVER_PORT
 
     7. Login. Use the real username and password of the system in which the FTP server runs.
 
