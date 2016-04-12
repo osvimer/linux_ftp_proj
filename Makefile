@@ -1,13 +1,12 @@
 all: make_server make_client
-make_server: server
+make_server:
 	cd server; make
-make_client: client
+make_client:
 	cd client; make
 clean_server:
 	cd server; make clean
 clean_client:
 	cd client; make clean
-.PHONY: all rebuild clean make_server make_client clean_server clean_client
+.PHONY: all rebuild clean 
 clean: clean_server clean_client
 rebuild: clean all
-
